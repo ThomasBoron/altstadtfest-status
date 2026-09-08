@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="refresh" content="120">
+<title>Altstadtfest Nürnberg – Netzstatus</title>
+<style>
+  :root {
+    --bg:#f6f7f9; --card:#fff; --fg:#14181f; --muted:#5b6472; --line:#dfe3e9;
+    --ok:#1d4ed8; --down:#c2410c; --warn:#a16207; --maint:#4b5563;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#0f1319; --card:#171c24; --fg:#e8ecf2; --muted:#9aa4b2; --line:#2a323d;
+           --ok:#60a5fa; --down:#fb923c; --warn:#fbbf24; --maint:#9ca3af; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 56px}
+  h1{font-size:1.35rem;margin:0 0 4px}
+  h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;
+      color:var(--muted);margin:26px 0 8px}
+  .banner{border-radius:12px;padding:14px 16px;margin:14px 0 6px;
+           background:var(--card);border:1px solid var(--line);
+           border-left:6px solid var(--maint);font-weight:600}
+  .banner.ok{border-left-color:var(--ok)}
+  .banner.down{border-left-color:var(--down)}
+  .banner.warn{border-left-color:var(--warn)}
+  .list{list-style:none;margin:0;padding:0;background:var(--card);
+         border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .row{display:grid;grid-template-columns:22px 1fr auto;gap:2px 10px;
+        padding:12px 14px;border-top:1px solid var(--line);align-items:center}
+  .row:first-child{border-top:0}
+  .glyph{grid-row:1/3;font-size:1.05rem;line-height:1}
+  .name{font-weight:600}
+  .state{font-weight:600;font-size:.9rem;text-align:right}
+  .bars{grid-column:2/4;display:flex;gap:2px;margin-top:6px}
+  .b{display:block;width:5px;height:16px;border-radius:2px;background:var(--maint)}
+  .b.ok{background:var(--ok)} .b.down{background:var(--down)}
+  .b.warn{background:var(--warn)} .b.maint{background:var(--maint)}
+  .meta{grid-column:2/4;color:var(--muted);font-size:.82rem;margin-top:6px}
+  .ok .glyph,.ok .state{color:var(--ok)}
+  .down .glyph,.down .state{color:var(--down)}
+  .warn .glyph,.warn .state{color:var(--warn)}
+  .maint .glyph,.maint .state{color:var(--maint)}
+  .desc{grid-column:2/4;color:var(--muted);font-size:.85rem;margin-top:5px}
+  /* Kompaktansicht: nur Symbol, Name, Zustand - eine Zeile je Dienst */
+  body.kompakt .desc,
+  body.kompakt .bars,
+  body.kompakt .meta,
+  body.kompakt .admin,
+  body.kompakt .fussdetail{display:none}
+  body.kompakt .row{padding:9px 14px}
+  body.kompakt h2{margin:18px 0 6px}
+  .umschalter{display:flex;justify-content:flex-end;margin:10px 0 4px}
+  .umschalter button{font:inherit;font-size:.85rem;color:var(--ok);
+      background:var(--card);border:1px solid var(--line);border-radius:999px;
+      padding:7px 15px;cursor:pointer}
+  .umschalter button:active{transform:translateY(1px)}
+  a.adm{color:inherit}
+  .admin{margin-top:26px;padding:14px 16px;background:var(--card);
+          border:1px solid var(--line);border-radius:12px}
+  .admin h3{margin:0 0 8px;font-size:.8rem;text-transform:uppercase;
+             letter-spacing:.07em;color:var(--muted)}
+  .admin ul{list-style:none;margin:0;padding:0}
+  .admin li{padding:5px 0;border-top:1px solid var(--line)}
+  .admin li:first-child{border-top:0}
+  .admin a{color:var(--ok);font-weight:600}
+  .admin p{margin:10px 0 0;color:var(--muted);font-size:.82rem}
+  footer{color:var(--muted);font-size:.82rem;margin-top:26px}
+  #stale{display:none;border-radius:12px;padding:14px 16px;margin:14px 0;
+          background:var(--card);border:1px solid var(--line);
+          border-left:6px solid var(--down);color:var(--down);font-weight:600}
+</style>
+</head>
+<body class="kompakt">
+<script>
+  // Sofort anwenden, damit die Seite nicht kurz in der falschen Ansicht aufblitzt.
+  try {
+    if (localStorage.getItem("ansicht") === "detail") {
+      document.body.classList.remove("kompakt");
+    }
+  } catch (e) {}
+</script>
+<div class="wrap">
+  <h1>Altstadtfest Nürnberg – Netzstatus</h1>
+  <div class="banner ok">Alles läuft – 9 von 9 Diensten erreichbar</div>
+  <div class="umschalter"><button id="umschalten" type="button"></button></div>
+
+  <!-- Wenn der Pi ausfaellt, friert diese Seite ein und wuerde faelschlich
+       "alles gut" zeigen. Deshalb prueft der Browser das Alter der Daten. -->
+  <div id="stale">Keine aktuellen Daten – die Überwachung vor Ort meldet sich
+    seit über 20 Minuten nicht. Der angezeigte Stand ist veraltet.</div>
+
+    <h2>Internet</h2>
+    <ul class="list">
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">Internetzugang (Starlink)</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">Ping über die Starlink-Antenne nach draußen. Zeigt, ob die Leitung überhaupt steht.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 47 ms &middot; 24 h 97.8 %</span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">Internet-Erreichbarkeit</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">Abruf einer externen Testseite über HTTPS. Schlägt nur diese fehl, während der Ping läuft, liegt es an Routing oder Paketgröße — nicht an der Leitung.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 239 ms &middot; 24 h 97.0 %</span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">Namensauflösung</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">DNS-Abfrage über die Fritzbox. Schlägt nur diese fehl, hängt der Router; das Internet selbst ist dann in Ordnung.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 42 ms &middot; 24 h 98.3 %</span>
+      </li>
+    </ul>
+    <h2>Netzwerk vor Ort</h2>
+    <ul class="list">
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">Router</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">FRITZ!Box 7530 AX. Übergang ins Internet, vergibt außerdem alle Adressen im Netz und löst Namen auf. Fällt sie aus, geht vor Ort nichts mehr.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 0 ms &middot; 24 h 100.0 % &middot; <a class="adm" href="http://192.168.10.1">Fritzbox öffnen</a></span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">WLAN-Steuerung</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">UniFi Cloud Key Gen2 Plus. Steuerzentrale der Access Points — hier werden WLAN-Namen, Kanäle und verbundene Geräte verwaltet. Fällt sie aus, funkt das WLAN weiter, nur die Verwaltung fehlt.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 50 ms &middot; 24 h 99.9 % &middot; <a class="adm" href="https://192.168.10.100">UniFi öffnen</a></span>
+      </li>
+    </ul>
+    <h2>WLAN-Zugangspunkte</h2>
+    <ul class="list">
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">WLAN Schenke</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">UniFi Access Point an der Schenke. Fällt nur dieser aus, ist genau dieser Bereich ohne WLAN — der Rest des Geländes läuft weiter.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 0 ms &middot; 24 h 100.0 % &middot; <b>0 Clients</b> &middot; <a class="adm" href="https://192.168.10.100">im Controller ansehen</a></span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">WLAN Nahe Küche</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">UniFi Access Point im Bereich Küche. Fällt nur dieser aus, ist genau dieser Bereich ohne WLAN — der Rest des Geländes läuft weiter.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 0 ms &middot; 24 h 100.0 % &middot; <b>0 Clients</b> &middot; <a class="adm" href="https://192.168.10.100">im Controller ansehen</a></span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">WLAN unter Schirm</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">UniFi Access Point unter dem Schirm. Fällt nur dieser aus, ist genau dieser Bereich ohne WLAN — der Rest des Geländes läuft weiter.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 0 ms &middot; 24 h 100.0 % &middot; <b>0 Clients</b> &middot; <a class="adm" href="https://192.168.10.100">im Controller ansehen</a></span>
+      </li>
+      <li class="row ok">
+        <span class="glyph" aria-hidden="true">●</span>
+        <span class="name">WLAN Kuhstall</span>
+        <span class="state">Erreichbar</span>
+        <span class="desc">UniFi Access Point im Kuhstall. Fällt nur dieser aus, ist genau dieser Bereich ohne WLAN — der Rest des Geländes läuft weiter.</span>
+        <span class="bars"><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i><i class="b ok"></i></span>
+        <span class="meta">Antwort 0 ms &middot; 24 h 100.0 % &middot; <b>0 Clients</b> &middot; <a class="adm" href="https://192.168.10.100">im Controller ansehen</a></span>
+      </li>
+    </ul>
+
+  <section class="admin">
+    <h3>Verwaltung</h3>
+    <ul>
+      <li><a href="http://192.168.10.159:3001">Uptime Kuma – Verlauf, Antwortzeiten, Alarme</a></li>
+      <li><a href="http://192.168.10.1">Fritzbox – Geräte, Adressen, Ereignisprotokoll</a></li>
+      <li><a href="https://192.168.10.100">UniFi-Controller – WLAN und Access Points</a></li>
+    </ul>
+    <p>Diese Adressen liegen im Netz vor Ort. Von unterwegs erreichst du sie
+       nur, solange du über Netbird verbunden bist.</p>
+  </section>
+
+  <footer>
+    Stand: 13.09.2026 06:27 Uhr &middot; Aktualisierung alle 5 Minuten<br>
+    <span class="fussdetail">WLAN-Clients 0 &middot; Temperatur 58,4 °C (24 h: 56,0 bis 70,1 °C) &middot; Laufzeit 2 T 9 h 38 min</span>
+  </footer>
+</div>
+<script>
+  (function () {
+    var knopf = document.getElementById("umschalten");
+    function beschriften() {
+      knopf.textContent = document.body.classList.contains("kompakt")
+        ? "Details einblenden" : "Details ausblenden";
+    }
+    knopf.addEventListener("click", function () {
+      var kompakt = document.body.classList.toggle("kompakt");
+      try { localStorage.setItem("ansicht", kompakt ? "kompakt" : "detail"); } catch (e) {}
+      beschriften();
+    });
+    beschriften();
+  })();
+
+  var generated = new Date("2026-09-13T04:27:01.858016+00:00");
+  var age = (Date.now() - generated.getTime()) / 60000;
+  if (age > 20) { document.getElementById("stale").style.display = "block"; }
+</script>
+</body>
+</html>
